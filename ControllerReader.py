@@ -1,7 +1,8 @@
+import numpy as np
 
 class ControllerReader:
-    self.inputDir = None
-    self.inputData = None
+    inputDir = None
+    inputData = None
 
     def __init__(self, inputDir):
         self.inputDir = inputDir
@@ -9,19 +10,18 @@ class ControllerReader:
 
     def readInput(self): #returns controller data per frame
         data = []
-        fileLength = len(f.read())/32 - 8
-
-        if self.inputDir == None or self.inputDir = "":
+        if self.inputDir == None or self.inputDir == "":
             print("Error: No input directory specified")
         else:
+            print("Reading controller input data")
             with open(self.inputDir, "rb") as f:
+                    fileLength = len(f.read())/32 - 8
                     f.seek(32*8) #skip header
-                    for i in range(fileLength):
+                    for i in range(int(fileLength)):
                         cb = f.read(32)[:8] #only read inputs
-                        data.append(cb)
+                        data.append(list(cb))
                         print(cb)
                         print(list(cb),"\n")
-
-            self.inputData = data #TODO: change to np.matrix?
-
-            
+            data = np.array(data)
+            self.inputData = data
+            return data
