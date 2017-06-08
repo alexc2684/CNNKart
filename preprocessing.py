@@ -27,18 +27,18 @@ def read_images(dirname):
 
 #find when A button is initially pressed
 def findInputStart(dtm_input):
-    i = 0:
-    while i < len(dtm_input):
-        if dtm_input[0] == 2:
-            return i
+    i = 0
+    while dtm_input[i][0] != 16:
         i += 1
-    return 0
+    while dtm_input[i][0] == 8:
+        i += 1
+    return i
 
 def getData(img_dir, dtm_dir):
     reader = ControllerReader(dtm_dir)
     controllerInputs = reader.readInput()
-    frames = read_images(img_dir)
     dtm_start = findInputStart(controllerInputs)
+    frames = read_images(img_dir)
     if dtm_start == 0:
         print("Error: A Button never pressed")
         return
@@ -50,6 +50,9 @@ def getData(img_dir, dtm_dir):
             labels.append(controllerInputs[i*3][4])
     else:
         labels = [controllerInputs[i][4] for i in range(0, len(controllerInputs), 3)]
+        frames = frames[:len(labels)]
     print("Frames ", len(frames))
     print("Labels ", len(labels))
+    labels = np.array(labels)
+    frames = np.array(frames)
     return frames, labels
