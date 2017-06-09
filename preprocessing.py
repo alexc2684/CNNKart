@@ -30,7 +30,7 @@ def findInputStart(dtm_input):
     i = 0
     while dtm_input[i][0] != 16:
         i += 1
-    while dtm_input[i][0] == 8:
+    while dtm_input[i][0] == 16:
         i += 1
     return i
 
@@ -53,6 +53,6 @@ def getData(img_dir, dtm_dir):
         frames = frames[:len(labels)]
     print("Frames ", len(frames))
     print("Labels ", len(labels))
-    labels = np.array(labels)
-    frames = np.array(frames)
+    # labels = np.array(labels)
+    # frames = np.array(frames)
     return frames, labels
