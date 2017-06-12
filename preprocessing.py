@@ -34,25 +34,40 @@ def findInputStart(dtm_input):
         i += 1
     return i
 
-def getData(img_dir, dtm_dir):
-    reader = ControllerReader(dtm_dir)
-    controllerInputs = reader.readInput()
-    dtm_start = findInputStart(controllerInputs)
-    frames = read_images(img_dir)
-    if dtm_start == 0:
-        print("Error: A Button never pressed")
-        return
-    controllerInputs = controllerInputs[dtm_start:]
-    controllerInputs = controllerInputs[:len(controllerInputs) - 2000]
-    labels = []
-    if len(controllerInputs) > 3*len(frames):
-        for i in range(0, len(frames)):
-            labels.append(controllerInputs[i*3][4])
-    else:
-        labels = [controllerInputs[i][4] for i in range(0, len(controllerInputs), 3)]
-        frames = frames[:len(labels)]
-    print("Frames ", len(frames))
-    print("Labels ", len(labels))
-    # labels = np.array(labels)
-    # frames = np.array(frames)
-    return frames, labels
+#load all frame data and controller inputs into training set
+def load_train_data(img_dir, dtm_dir):
+    #init train/validation
+    x_train = []
+    y_train = []
+    frame_data = os.listdir(img_dir)
+    frame_data.sort()
+    inputs = os.listdir(dtm_dir)
+    inputs.sort()
+    for img, dtm in zip(frame_data, inputs):
+        print(img_dir + "/" + img, dtm_dir + "/" + dtm)
+        if os.path.isdir(img_dir + "/" + img):
+            reader = ControllerReader(dtm_dir + "/" + dtm)
+            controllerInputs = reader.readInput()
+            dtm_start = findInputStart(controllerInputs)
+            frames = read_images(img_dir + "/" + img + "/")
+            if dtm_start == 0:
+                print("Error: A Button never pressed")
+                return
+            controllerInputs = controllerInputs[dtm_start:]
+            controllerInputs = controllerInputs[:len(controllerInputs) - 2000]
+            labels = []
+            if len(controllerInputs) > 3*len(frames):
+                for i in range(0, len(frames)):
+                    labels.append(controllerInputs[i*3][4])
+            else:
+                labels = [controllerInputs[i][4] for i in range(0, len(controllerInputs), 3)]
+                frames = frames[:len(labels)]
+            print(len(frames))
+            x_train.extend(frames)
+            y_train.extend(labels)
+    print(len(x_train))
+    x_train = np.array(x_train)
+    y_train = np.array(y_train)
+    print(x_train.shape)
+    print(y_train.shape)
+    return x_train, y_train

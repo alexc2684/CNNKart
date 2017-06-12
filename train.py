@@ -11,18 +11,17 @@ learning_rate = .0001
 num_epochs = 100
 batch_size = 50
 
-frame_dirs = ["data/frames/frametest/"]#, "data/frames/frames2/"]
-inputs_dirs = ["data/inputs/race1"]#, "data/inputs/race2"]
+FRAMES_DIR = "data/frames"
+INPUTS_DIR = "data/inputs"
 
-train_data = []
-train_labels = []
+train_data, train_labels = pp.load_train_data(FRAMES_DIR, INPUTS_DIR)
 
-for i in range(len(frame_dirs)):
-    tdata, tlabels = pp.getData(frame_dirs[i], inputs_dirs[i])
-    train_data.extend(tdata)
-    train_labels.extend(tlabels)
+# for i in range(len(frame_dirs)):
+#     tdata, tlabels = pp.load_train_data(frame_dirs[i], inputs_dirs[i])
+#     train_data.extend(tdata)
+#     train_labels.extend(tlabels)
 
-print(train_data[0].shape)
+print(train_data.shape)
 train_data = np.array(train_data)
 train_labels = np.array(train_labels)
 num_samples = train_data.shape[0]
