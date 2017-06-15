@@ -17,7 +17,7 @@ def read_images(dirname):
     images = []
     for img in os.listdir(dirname):
         if img.endswith(".png"):
-            print("Loading: ", img)
+            print("Loading:", img)
             imgdata = png.Reader(filename=dirname+img)
             w, h, pixels, metadata = imgdata.asDirect()
             image = np.vstack(pixels)
@@ -41,8 +41,10 @@ def load_train_data(img_dir, dtm_dir):
     y_train = []
     frame_data = os.listdir(img_dir)
     frame_data.sort()
+    frame_data.remove(".DS_Store")
     inputs = os.listdir(dtm_dir)
     inputs.sort()
+    inputs.remove(".DS_Store")
     for img, dtm in zip(frame_data, inputs):
         print(img_dir + "/" + img, dtm_dir + "/" + dtm)
         if os.path.isdir(img_dir + "/" + img):
@@ -51,7 +53,7 @@ def load_train_data(img_dir, dtm_dir):
             dtm_start = findInputStart(controllerInputs)
             frames = read_images(img_dir + "/" + img + "/")
             if dtm_start == 0:
-                print("Error: A Button never pressed")
+                print("Error: Y Button never pressed")
                 return
             controllerInputs = controllerInputs[dtm_start:]
             controllerInputs = controllerInputs[:len(controllerInputs) - 2000]
@@ -62,12 +64,8 @@ def load_train_data(img_dir, dtm_dir):
             else:
                 labels = [controllerInputs[i][4] for i in range(0, len(controllerInputs), 3)]
                 frames = frames[:len(labels)]
-            print(len(frames))
             x_train.extend(frames)
             y_train.extend(labels)
-    print(len(x_train))
     x_train = np.array(x_train)
     y_train = np.array(y_train)
-    print(x_train.shape)
-    print(y_train.shape)
     return x_train, y_train

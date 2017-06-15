@@ -7,21 +7,15 @@ import preprocessing as pp
 IMG_WIDTH = 640
 IMG_HEIGHT = 400
 IMG_DEPTH = 3
-learning_rate = .0001
-num_epochs = 100
-batch_size = 50
+LEARNING_RATE = .0001
+NUM_EPOCHS = 100
+BATCH_SIZE = 10
 
 FRAMES_DIR = "data/frames"
 INPUTS_DIR = "data/inputs"
 
 train_data, train_labels = pp.load_train_data(FRAMES_DIR, INPUTS_DIR)
 
-# for i in range(len(frame_dirs)):
-#     tdata, tlabels = pp.load_train_data(frame_dirs[i], inputs_dirs[i])
-#     train_data.extend(tdata)
-#     train_labels.extend(tlabels)
-
-print(train_data.shape)
 train_data = np.array(train_data)
 train_labels = np.array(train_labels)
 num_samples = train_data.shape[0]
@@ -41,12 +35,13 @@ def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1,2,2,1],
                             strides=[1,2,2,1], padding='SAME')
 
-x = tf.placeholder(tf.float32, shape=[batch_size, IMG_WIDTH, IMG_HEIGHT, IMG_DEPTH])
-y_ = tf.placeholder(tf.float32, shape=[batch_size, 1])
+x = tf.placeholder(tf.float32, shape=[None, IMG_WIDTH, IMG_HEIGHT, IMG_DEPTH])
+y_ = tf.placeholder(tf.float32, shape=[None, 1])
 
 W_conv1 = weight_variable([5, 5, 3, 32])
 b_conv1 = bias_variable([32])
 
+x = tf.reshape(x, [-1, IMG_WIDTH, IMG_HEIGHT, IMG_DEPTH])
 #640x400x32 --> 320x200x32
 h_conv1 = tf.nn.relu(conv2d(x, W_conv1) + b_conv1)
 h_pool1 = max_pool_2x2(h_conv1)
@@ -66,28 +61,33 @@ h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
 keep_prob = tf.placeholder(tf.float32)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+# print("FC Dropout", h_fc1_drop.shape)
 
 W_fc2 = weight_variable([1024, 1])
 b_fc2 = bias_variable([1])
 
-y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+y_conv = tf.matmul(h_fc1, W_fc2) + b_fc2
 
 cost = tf.reduce_sum(tf.pow(y_conv - y_, 2))/(2*num_samples)
-optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
+optimizer = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cost)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     print("Beginning optimization")
-    for epoch in range(num_epochs):
-        batch_x = np.array(train_data[epoch*batch_size:epoch*batch_size + batch_size])
-        batch_x = np.reshape(batch_x, [batch_x.shape[0], IMG_WIDTH, IMG_HEIGHT, IMG_DEPTH])
-        batch_y = np.array(train_labels[epoch*batch_size:epoch*batch_size + batch_size])
-        batch_y = np.reshape(batch_y, [batch_y.shape[0], 1])
+    for epoch in range(NUM_EPOCHS):
+        print("Epoch", epoch)
+        start = epoch*BATCH_SIZE % num_samples
+        end = start + BATCH_SIZE
+        batch_x = train_data[start:end]
+        batch_y = train_labels[start:end]
+        batch_y = np.reshape(batch_y, (len(batch_y), 1))
 
         optimizer.run(feed_dict={x: batch_x, y_: batch_y})
 
-        if epoch % 20 == 0:
-            c = sess.run(cost, feed_dict={X: train_data, Y:train_labels})
-            print("Epoch:", epoch, "cost=", "{:.9f}".format(c), \
-                "W=", sess.run(W), "b=", sess.run(b))
+        if epoch % 5 == 0:
+            c = sess.run(cost, feed_dict={x: batch_x, y_:batch_y})
+            print("Epoch:", epoch, "cost:", c)
     print("Optimization finished")
+
+    saver = tf.train.Saver()
+    saver.save(sess, "MLKart1.0", global_step=1000)
