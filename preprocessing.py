@@ -41,10 +41,12 @@ def load_train_data(img_dir, dtm_dir):
     y_train = []
     frame_data = os.listdir(img_dir)
     frame_data.sort()
-    frame_data.remove(".DS_Store")
+    if frame_data.find(".DS_Store") != -1:
+        frame_data.remove(".DS_Store")
     inputs = os.listdir(dtm_dir)
     inputs.sort()
-    inputs.remove(".DS_Store")
+    if inputs.find(".DS_Store") != -1:
+        inputs.remove(".DS_Store")
     for img, dtm in zip(frame_data, inputs):
         print(img_dir + "/" + img, dtm_dir + "/" + dtm)
         if os.path.isdir(img_dir + "/" + img):
