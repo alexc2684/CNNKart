@@ -28,10 +28,12 @@ def read_images(dirname):
 #find when A button is initially pressed
 def findInputStart(dtm_input):
     i = 0
-    while dtm_input[i][0] != 16:
+    while dtm_input[i][0] != 16 and i < len(dtm_input):
         i += 1
-    while dtm_input[i][0] == 16:
+    while dtm_input[i][0] == 16 and i < len(dtm_input):
         i += 1
+    if i == len(dtm_input) - 1:
+        return -1
     return i
 
 def findFiles(folder):
@@ -48,10 +50,14 @@ def load_train_data(img_dir, dtm_dir):
     y_train = []
     frame_data = os.listdir(img_dir)
     frame_data.sort()
-    for path in findFiles(frame_data):
-        frame_data.remove(path)
+    for path in frame_data:
+        if path == ".DS_Store":
+            frame_data.remove(path)
     inputs = os.listdir(dtm_dir)
     inputs.sort()
+    for path in inputs:
+        if path == ".DS_Store":
+            inputs.remove(path)
     for path in findFiles(frame_data):
         frame_data.remove(path)
     for img, dtm in zip(frame_data, inputs):
@@ -61,7 +67,7 @@ def load_train_data(img_dir, dtm_dir):
             controllerInputs = reader.readInput()
             dtm_start = findInputStart(controllerInputs)
             frames = read_images(img_dir + "/" + img + "/")
-            if dtm_start == 0:
+            if dtm_start == -1:
                 print("Error: Y Button never pressed")
                 return
             controllerInputs = controllerInputs[dtm_start:]
