@@ -7,8 +7,8 @@ from ControllerReader import ControllerReader
 IMG_WIDTH = 640
 IMG_HEIGHT = 400
 IMG_DEPTH = 3
-img_dir = "data/frames/frames1/"
-dtm_dir = "data/inputs/race1"
+#img_dir = "data/frames/frames1/"
+#dtm_dir = "data/inputs/race1"
 
 def read_images(dirname):
     #read each frame
@@ -28,9 +28,9 @@ def read_images(dirname):
 #find when A button is initially pressed
 def findInputStart(dtm_input):
     i = 0
-    while dtm_input[i][0] != 16 and i < len(dtm_input):
+    while int(dtm_input[i][0]) != 16 and i < len(dtm_input):
         i += 1
-    while dtm_input[i][0] == 16 and i < len(dtm_input):
+    while int(dtm_input[i][0]) == 16 and i < len(dtm_input):
         i += 1
     if i == len(dtm_input) - 1:
         return -1
@@ -64,6 +64,7 @@ def load_train_data(img_dir, dtm_dir):
         print(img_dir + "/" + img, dtm_dir + "/" + dtm)
         if os.path.isdir(img_dir + "/" + img):
             reader = ControllerReader(dtm_dir + "/" + dtm)
+ 	    print dtm_dir + '/' + dtm
             controllerInputs = reader.readInput()
             dtm_start = findInputStart(controllerInputs)
             frames = read_images(img_dir + "/" + img + "/")

@@ -19,7 +19,9 @@ class ControllerReader:
                     f.seek(32*8) #skip header
                     for i in range(int(fileLength)):
                         cb = f.read(32)[:8] #only read inputs
-                        data.append(list(cb))
+                        cb = [ord(i) for i in cb]
+                        data.append(cb)
+                        print(cb)
             data = np.array(data)
             self.inputData = data
             return data
